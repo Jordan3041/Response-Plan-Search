@@ -1,0 +1,97 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: radial-gradient(circle at top, #1f2937, #020617);
+  color: #e5e7eb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* Main container */
+#main-app {
+  width: 100%;
+  max-width: 520px;
+  text-align: center;
+}
+
+/* Card layout */
+.card {
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  backdrop-filter: blur(10px);
+}
+
+/* Titles */
+h1 {
+  margin-bottom: 20px;
+  font-size: 26px;
+  font-weight: 600;
+}
+
+/* Inputs */
+input, select {
+  width: 100%;
+  padding: 14px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+  background: #111827;
+  color: #e5e7eb;
+  outline: none;
+}
+
+input::placeholder {
+  color: #6b7280;
+}
+
+/* Button */
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4);
+}
+
+/* Result Card */
+.result-card {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 14px;
+  background: #020617;
+  border: 1px solid #1f2937;
+  text-align: left;
+}
+
+/* Level colors */
+.level-alpha { color: #22c55e; }
+.level-bravo { color: #eab308; }
+.level-charlie { color: #f97316; }
+.level-delta { color: #ef4444; }
+.level-echo { color: #ec4899; }
+
+/* Access screen centering */
+#access-section {
+  width: 100%;
+  max-width: 400px;
+}
+
+#access-section input {
+  text-align: center;
+}

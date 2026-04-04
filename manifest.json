@@ -1,0 +1,8 @@
+{
+  "name": "CAD Fallback",
+  "short_name": "CAD",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#111",
+  "theme_color": "#111"
+}

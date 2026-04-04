@@ -1,0 +1,39 @@
+[
+  {
+    "determinant": "69-E-06",
+    "description": "Structure Fire",
+    "level": "Echo",
+    "agencies": {
+      "Boise Fire": "3E, 1BFT, 1BFDBC, 1M",
+      "Meridian Fire": "2E, 1T, 1BC",
+      "Eagle Fire": "3EFE, 1EFT, 1EFDBC"
+    },
+    "notes": "High priority response"
+  },
+    {
+    "determinant": "06-D-01",
+    "description": "Breathing Problems",
+    "level": "Delta",
+    "agencies": {
+      "Boise Fire": "1QRU, 1M",
+      "Meridian Fire": "1QRU, 1M",
+      "Eagle Fire": "1QRU, 1M",
+      "Kuna Fire": "1QRU, 1M",
+      "MidStar Fire": "1QRU, 1M"
+    },
+    "notes": "High priority response"
+  },
+    {
+    "determinant": "01-A-01",
+    "description": "Abdominal Pain",
+    "level": "Alpha",
+    "agencies": {
+      "Boise Fire": "1QRU",
+      "Meridian Fire": "1QRU",
+      "MidStar Fire": "1QRU",
+      "Eagle Fire": "1QRU",
+      "Kuna Fire": "1QRU"
+    },
+    "notes": "N/A"
+  }
+]
