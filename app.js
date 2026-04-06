@@ -14,9 +14,8 @@ accessButton.addEventListener('click', () => {
     accessSection.style.display = 'none';
     mainApp.style.display = 'block';
 
-    // Auto-focus search (great for mobile + dispatch)
     setTimeout(() => {
-      document.getElementById('search').focus();
+      searchInput.focus();
     }, 100);
   } else {
     alert('Incorrect access key');
@@ -26,48 +25,43 @@ accessButton.addEventListener('click', () => {
 // 🔹 Elements
 const searchInput = document.getElementById('search');
 const resultDiv = document.getElementById('result');
+const autocompleteList = document.getElementById('autocomplete-list');
 
 // 🎨 Agency Colors
 const agencyColors = {
-  "Boise Fire": "#f97316",     // Orange
-  "Meridian Fire": "#ec4899",  // Pink
-  "Eagle Fire": "#eab308",     // Yellow
-  "MidStar": "#a855f7",        // Purple
-  "Kuna Fire": "#14b8a6"       // Teal
+  "Boise Fire": "#f97316",
+  "Meridian Fire": "#ec4899",
+  "Eagle Fire": "#eab308",
+  "MidStar": "#a855f7",
+  "Kuna Fire": "#14b8a6"
 };
 
-// 🔹 Load JSON Data
+// 🔹 Data
 let data = [];
 
+// 🔹 Load JSON
 fetch('data.json')
   .then(res => res.json())
   .then(json => {
-    // 🔧 Clean data coming from Excel
     data = json.map(item => ({
       ...item,
       determinant: String(item.determinant).trim(),
       description: item.description ? String(item.description).trim() : "",
       level: item.level ? String(item.level).trim() : ""
     }));
-  })
-  .catch(err => {
-    console.error(err);
-    resultDiv.innerHTML = `<p>Error loading data</p>`;
   });
 
-// 🔹 Normalize Determinant (VERY ROBUST)
+// 🔹 Normalize
 function normalizeDeterminant(str) {
-  if (!str) return '';
-
-  return String(str)
+  return String(str || '')
     .toUpperCase()
-    .replace(/[^A-Z0-9]/g, '')       // remove dashes, spaces, etc.
-    .replace(/(\d+)/g, (num) => String(Number(num))); // remove ALL leading zeros
+    .replace(/[^A-Z0-9]/g, '')
+    .replace(/(\d+)/g, num => String(Number(num)));
 }
 
-// 🔍 Perform Search
-function performSearch() {
-  const rawQuery = searchInput.value;
+// 🔍 SEARCH FUNCTION
+function performSearch(queryOverride = null) {
+  const rawQuery = queryOverride || searchInput.value;
 
   if (!rawQuery) {
     resultDiv.innerHTML = '';
@@ -85,69 +79,75 @@ function performSearch() {
     return;
   }
 
-  // 🚒 Build Agency List
   let agencyHTML = '';
 
   for (const agency in match.agencies) {
     const color = agencyColors[agency] || "#60a5fa";
 
     agencyHTML += `
-      <div style="
-        margin-bottom:10px;
-        padding:10px;
-        border-radius:8px;
-        background: rgba(255,255,255,0.04);
-      ">
-        <strong style="
-          color:${color};
-          font-size:16px;
-        ">
-          ${agency}:
-        </strong>
-        <div style="margin-top:4px; font-size:15px;">
-          ${match.agencies[agency]}
-        </div>
+      <div style="margin-bottom:10px; padding:10px; border-radius:8px; background: rgba(255,255,255,0.04);">
+        <strong style="color:${color};">${agency}:</strong>
+        <div style="margin-top:4px;">${match.agencies[agency]}</div>
       </div>
     `;
   }
 
-  // 🚨 Render Result
   resultDiv.innerHTML = `
     <div class="result-card">
       <h2>${match.determinant} - ${match.description}</h2>
-
-      <p class="level-${match.level.toLowerCase()}" style="font-size:18px;">
-        <strong>${match.level}</strong>
-      </p>
-
-      <div style="margin-top:10px;">
-        ${agencyHTML}
-      </div>
-
-      ${
-        match.notes
-          ? `<div style="
-              margin-top:12px;
-              padding:10px;
-              background:rgba(59,130,246,0.1);
-              border-left:4px solid #3b82f6;
-              border-radius:6px;
-              font-size:15px;
-            ">
-              <strong>Notes:</strong> ${match.notes}
-            </div>`
-          : ''
-      }
+      <p class="level-${match.level.toLowerCase()}"><strong>${match.level}</strong></p>
+      ${agencyHTML}
+      ${match.notes ? `<div style="margin-top:10px;"><strong>Notes:</strong> ${match.notes}</div>` : ''}
     </div>
   `;
 }
 
-// 🔹 Live Search
-searchInput.addEventListener('input', performSearch);
+// 🔮 AUTOCOMPLETE
+searchInput.addEventListener('input', () => {
+  const input = searchInput.value;
+  autocompleteList.innerHTML = '';
 
-// 🔹 Support Enter Key (mobile keyboards)
+  if (!input) return;
+
+  const normalizedInput = normalizeDeterminant(input);
+
+  const matches = data
+    .filter(item =>
+      normalizeDeterminant(item.determinant).startsWith(normalizedInput)
+    )
+    .slice(0, 10); // limit results
+
+  matches.forEach(item => {
+    const div = document.createElement('div');
+    div.classList.add('autocomplete-item');
+
+    div.innerHTML = `
+      <strong>${item.determinant}</strong> - ${item.description}
+    `;
+
+    div.addEventListener('click', () => {
+      searchInput.value = item.determinant;
+      autocompleteList.innerHTML = '';
+      performSearch(item.determinant);
+    });
+
+    autocompleteList.appendChild(div);
+  });
+
+  performSearch();
+});
+
+// 🔹 Close autocomplete if clicking outside
+document.addEventListener('click', (e) => {
+  if (e.target !== searchInput) {
+    autocompleteList.innerHTML = '';
+  }
+});
+
+// 🔹 Enter key
 searchInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
+    autocompleteList.innerHTML = '';
     performSearch();
   }
 });
