@@ -1,111 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fire/EMS Response Plan Search</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      font-family: Arial;
-      background: #020617;
-      color: white;
-      text-align: center;
-      padding: 20px;
-    }
+<title>Fire/EMS Response Plan Search</title>
 
-    input, textarea, button {
-      width: 90%;
-      max-width: 500px;
-      margin: 8px;
-      padding: 12px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-    }
+<style>
+body {
+  font-family: Arial;
+  background: #020617;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
 
-    button {
-      background: #2563eb;
-      color: white;
-      cursor: pointer;
-    }
+/* Inputs */
+input, textarea, select, button {
+  width: 90%;
+  max-width: 500px;
+  margin: 8px;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+}
 
-    .result-card {
-      margin-top: 20px;
-      padding: 20px;
-      background: #020617;
-      border: 1px solid #1f2937;
-      border-radius: 10px;
-    }
+/* Buttons */
+button {
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+}
 
-    .autocomplete-items {
-      text-align: left;
-      max-width: 500px;
-      margin: auto;
-    }
+/* Results */
+.result-card {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+}
 
-    .autocomplete-item {
-      padding: 10px;
-      background: #020617;
-      border-bottom: 1px solid #1f2937;
-      cursor: pointer;
-    }
+/* Autocomplete */
+.autocomplete-items {
+  max-width: 500px;
+  margin: auto;
+  text-align: left;
+}
 
-    .autocomplete-item:hover {
-      background: #1e293b;
-    }
+.autocomplete-item {
+  padding: 10px;
+  background: #020617;
+  border-bottom: 1px solid #1f2937;
+  cursor: pointer;
+}
 
-    .autocomplete-active {
-      background: #2563eb !important;
-    }
-  </style>
+.autocomplete-item:hover {
+  background: #1e293b;
+}
+
+.autocomplete-active {
+  background: #2563eb !important;
+}
+
+/* Admin Panel */
+#admin-panel {
+  max-width: 500px;
+  margin: 30px auto;
+}
+
+#admin-panel textarea {
+  min-height: 80px;
+}
+</style>
 </head>
 
 <body>
 
-  <!-- ACCESS -->
-  <div id="access-section">
-    <h2>Enter Access Key</h2>
-    <input id="access-key">
-    <button id="access-submit">Enter</button>
+<!-- ACCESS -->
+<div id="access-section">
+  <h2>Enter Access Key</h2>
+  <input id="access-key">
+  <button id="access-submit">Enter</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app" style="display:none;">
+
+  <h1 id="agency-banner"></h1>
+
+  <input id="search" placeholder="Enter determinant (ex: 69-E-06)">
+  <div id="autocomplete-list"></div>
+
+  <div id="result"></div>
+
+  <!-- ADMIN -->
+  <div id="admin-panel" style="display:none;">
+    <h3>Admin Editor</h3>
+
+    <input id="edit-determinant" placeholder="Determinant">
+    <input id="edit-description" placeholder="Description">
+    <input id="edit-level" placeholder="Level">
+
+    <select id="agency-select">
+      <option>Boise Fire</option>
+      <option>Meridian Fire</option>
+      <option>Eagle Fire</option>
+      <option>Kuna Fire</option>
+      <option>Nampa Fire</option>
+      <option>Caldwell Fire</option>
+      <option>MidStar</option>
+    </select>
+
+    <textarea id="edit-agency-response" placeholder="Response Plan"></textarea>
+
+    <textarea id="edit-notes" placeholder="Notes"></textarea>
+
+    <button onclick="saveEntry()">Save</button>
+    <button onclick="exportJSON()">Export JSON</button>
+
+    <input type="file" id="import-file" accept=".json">
+    <button onclick="importJSON()">Import JSON</button>
+
+    <button onclick="exitAdmin()" style="background:#dc2626;">Exit Admin</button>
   </div>
 
-  <!-- MAIN APP -->
-  <div id="main-app" style="display:none;">
+</div>
 
-    <h1 id="agency-banner"></h1>
-
-    <input id="search" placeholder="Enter determinant">
-
-    <div id="autocomplete-list"></div>
-
-    <div id="result"></div>
-
-    <!-- ADMIN PANEL -->
-    <div id="admin-panel" style="display:none;">
-      <h3>Admin Editor</h3>
-
-      <input id="edit-determinant" placeholder="Determinant">
-      <input id="edit-description" placeholder="Description">
-      <input id="edit-level" placeholder="Level">
-
-      <textarea id="edit-boise" placeholder="Boise Fire"></textarea>
-      <textarea id="edit-meridian" placeholder="Meridian Fire"></textarea>
-      <textarea id="edit-eagle" placeholder="Eagle Fire"></textarea>
-      <textarea id="edit-kuna" placeholder="Kuna Fire"></textarea>
-      <textarea id="edit-midstar" placeholder="MidStar"></textarea>
-
-      <textarea id="edit-notes" placeholder="Notes"></textarea>
-
-      <button onclick="saveEntry()">Save</button>
-      <button onclick="exportJSON()">Export JSON</button>
-
-      <input type="file" id="import-file" accept=".json">
-      <button onclick="importJSON()">Import JSON</button>
-    </div>
-
-  </div>
-
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
