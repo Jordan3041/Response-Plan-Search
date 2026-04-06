@@ -1,54 +1,76 @@
 // app.js
 
-// 🔐 Access Key
-const accessKey = "911";
-
-const accessInput = document.getElementById('access-key');
-const accessSection = document.getElementById('access-section');
-const mainApp = document.getElementById('main-app');
-const accessButton = document.getElementById('access-submit');
-
-accessButton.addEventListener('click', () => {
-  if (accessInput.value === accessKey) {
-    accessSection.style.display = 'none';
-    mainApp.style.display = 'block';
-
-    setTimeout(() => searchInput.focus(), 100);
-  } else {
-    alert('Incorrect access key');
-  }
-});
-
-// 🔹 Elements
-const searchInput = document.getElementById('search');
-const resultDiv = document.getElementById('result');
-const autocompleteList = document.getElementById('autocomplete-list');
-
-// 🎨 Agency Colors
-const agencyColors = {
-  "Boise Fire": "#f97316",
-  "Meridian Fire": "#ec4899",
-  "Eagle Fire": "#eab308",
-  "MidStar": "#a855f7",
-  "Kuna Fire": "#14b8a6"
+// 🔐 Access Key → Data File Mapping
+const accessMap = {
+  "911": { file: "data.json", name: "Default Agency" },
+  "ada911": { file: "ada_data.json", name: "Ada County" },
+  "canyon911": { file: "canyon_data.json", name: "Canyon County" }
 };
 
 let data = [];
 let currentFocus = -1;
 
-// 🔹 Load Data
-fetch('data.json')
-  .then(res => res.json())
-  .then(json => {
-    data = json.map(item => ({
-      ...item,
-      determinant: String(item.determinant).trim(),
-      description: item.description || "",
-      level: item.level || ""
-    }));
-  });
+// 🔹 Elements
+const accessInput = document.getElementById('access-key');
+const accessSection = document.getElementById('access-section');
+const mainApp = document.getElementById('main-app');
+const accessButton = document.getElementById('access-submit');
 
-// 🔹 Normalize
+const searchInput = document.getElementById('search');
+const resultDiv = document.getElementById('result');
+const autocompleteList = document.getElementById('autocomplete-list');
+const agencyBanner = document.getElementById('agency-banner'); // optional
+
+// 🎨 Agency Colors
+const agencyColors = {
+  "Boise Fire": "#f97316",
+  "Caldwell Fire": "#f80202",
+  "Meridian Fire": "#ec4899",
+  "Eagle Fire": "#eab308",
+  "MidStar": "#a855f7",
+  "Nampa Fire": "#f80202",
+  "Kuna Fire": "#14b8a6"
+};
+
+// 🔐 Handle Access
+accessButton.addEventListener('click', () => {
+  const key = accessInput.value.trim();
+  const config = accessMap[key];
+
+  if (!config) {
+    alert("Invalid access key");
+    return;
+  }
+
+  // Load correct dataset
+  fetch(config.file)
+    .then(res => res.json())
+    .then(json => {
+      data = json.map(item => ({
+        ...item,
+        determinant: String(item.determinant).trim(),
+        description: item.description || "",
+        level: item.level || ""
+      }));
+
+      // Show app
+      accessSection.style.display = 'none';
+      mainApp.style.display = 'block';
+
+      // Optional agency banner
+      if (agencyBanner) {
+        agencyBanner.innerText = config.name.toUpperCase();
+      }
+
+      setTimeout(() => searchInput.focus(), 100);
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Error loading data file");
+    });
+});
+
+// 🔹 Normalize Determinant
 function normalizeDeterminant(str) {
   return String(str || '')
     .toUpperCase()
@@ -56,7 +78,7 @@ function normalizeDeterminant(str) {
     .replace(/(\d+)/g, num => String(Number(num)));
 }
 
-// 🔍 Search
+// 🔍 Search Function
 function performSearch(queryOverride = null) {
   const rawQuery = queryOverride || searchInput.value;
 
@@ -92,14 +114,14 @@ function performSearch(queryOverride = null) {
   resultDiv.innerHTML = `
     <div class="result-card">
       <h2>${match.determinant} - ${match.description}</h2>
-      <p class="level-${match.level.toLowerCase()}"><strong>${match.level}</strong></p>
+      <p class="level-${(match.level || "").toLowerCase()}"><strong>${match.level}</strong></p>
       ${agencyHTML}
       ${match.notes ? `<div><strong>Notes:</strong> ${match.notes}</div>` : ''}
     </div>
   `;
 }
 
-// 🔮 Autocomplete
+// 🔮 Autocomplete (with keyboard nav)
 searchInput.addEventListener('input', () => {
   const input = searchInput.value;
   autocompleteList.innerHTML = '';
@@ -115,7 +137,7 @@ searchInput.addEventListener('input', () => {
     )
     .slice(0, 10);
 
-  matches.forEach((item, index) => {
+  matches.forEach((item) => {
     const div = document.createElement('div');
     div.classList.add('autocomplete-item');
 
@@ -147,6 +169,7 @@ searchInput.addEventListener('keydown', (e) => {
   } 
   else if (e.key === 'Enter') {
     e.preventDefault();
+
     if (currentFocus > -1 && items[currentFocus]) {
       items[currentFocus].click();
     } else {
@@ -155,7 +178,7 @@ searchInput.addEventListener('keydown', (e) => {
   }
 });
 
-// 🔹 Highlight active item
+// 🔹 Highlight active
 function addActive(items) {
   if (!items) return;
 
@@ -174,7 +197,7 @@ function removeActive(items) {
   }
 }
 
-// 🔹 Close autocomplete when clicking outside
+// 🔹 Close autocomplete
 document.addEventListener('click', (e) => {
   if (e.target !== searchInput) {
     autocompleteList.innerHTML = '';
