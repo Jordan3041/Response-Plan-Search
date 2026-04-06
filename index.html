@@ -1,78 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Fire/EMS Response Plan Search</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Fire/EMS Response Plan Search</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(circle at top, #1f2937, #020617);
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
 
-<style>
-body {
-  font-family: Arial;
-  background: #020617;
-  color: white;
-  text-align: center;
-  padding: 20px;
-}
+    /* Containers */
+    #main-app {
+      width: 100%;
+      max-width: 520px;
+      text-align: center;
+    }
 
-/* Inputs */
-input, textarea, select, button {
-  width: 90%;
-  max-width: 500px;
-  margin: 8px;
-  padding: 12px;
-  border-radius: 8px;
-  border: none;
-  font-size: 16px;
-}
+    .card {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      backdrop-filter: blur(10px);
+      margin-bottom: 20px;
+    }
 
-/* Buttons */
-button {
-  background: #2563eb;
-  color: white;
-  cursor: pointer;
-}
+    h1 {
+      margin-bottom: 20px;
+      font-size: 26px;
+      font-weight: 600;
+    }
 
-/* Results */
-.result-card {
-  margin-top: 20px;
-  padding: 20px;
-  border: 1px solid #1f2937;
-  border-radius: 10px;
-}
+    h2 {
+      margin-bottom: 15px;
+      font-weight: 500;
+    }
 
-/* Autocomplete */
-.autocomplete-items {
-  max-width: 500px;
-  margin: auto;
+    /* Inputs */
+    input, select {
+      width: 100%;
+      padding: 14px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border: none;
+      font-size: 18px;
+      background: #111827;
+      color: #e5e7eb;
+      outline: none;
+    }
+
+    input::placeholder {
+      color: #6b7280;
+    }
+
+    /* Button */
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4);
+    }
+
+    /* Result Card */
+    .result-card {
+      padding: 20px;
+      border-radius: 14px;
+      background: #020617;
+      border: 1px solid #1f2937;
+      font-size: 16px;
+      text-align: left;
+    }
+
+    /* Priority Colors */
+    .level-alpha { color: #22c55e; }
+    .level-bravo { color: #eab308; }
+    .level-charlie { color: #f97316; }
+    .level-delta { color: #ef4444; }
+    .level-echo { color: #ec4899; }
+
+    /* Access section */
+    #access-section {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    #access-section input {
+      text-align: center;
+    }
+
+    .autocomplete-items {
+  position: relative;
+  width: 100%;
   text-align: left;
-}
+  margin-top: -8px;
+    }
 
-.autocomplete-item {
-  padding: 10px;
+    .autocomplete-item {
+  padding: 12px;
   background: #020617;
   border-bottom: 1px solid #1f2937;
   cursor: pointer;
-}
+    }
 
-.autocomplete-item:hover {
+    .autocomplete-item:hover {
   background: #1e293b;
-}
+    }
 
-.autocomplete-active {
+    .autocomplete-item strong {
+  color: #60a5fa;
+    }
+
+    /* Highlight selected autocomplete item */
+    .autocomplete-active {
   background: #2563eb !important;
-}
+  color: white;
+    }
 
-/* Admin Panel */
-#admin-panel {
-  max-width: 500px;
-  margin: 30px auto;
-}
+    /* Admin Panel */
+    #admin-panel {
+    max-width: 500px;
+    margin: 30px auto;
+    }
 
-#admin-panel textarea {
+    #admin-panel textarea {
   min-height: 80px;
-}
-</style>
+    }
+    
+  </style>
 </head>
 
 <body>
