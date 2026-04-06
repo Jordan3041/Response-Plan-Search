@@ -56,13 +56,17 @@ accessButton.addEventListener('click', () => {
 // LOAD DATA
 function loadData(file, name) {
   fetch(file)
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} loading ${file}`);
+      }
+      return res.json();
+    })
     .then(json => {
       data = json;
 
       accessSection.style.display = 'none';
       mainApp.style.display = 'block';
-
       agencyBanner.innerText = name.toUpperCase();
 
       if (isAdmin) {
@@ -71,7 +75,10 @@ function loadData(file, name) {
 
       searchInput.focus();
     })
-    .catch(() => alert("Error loading data file"));
+    .catch(err => {
+      console.error("Load failed:", file, err);
+      alert(`Error loading data file: ${file}`);
+    });
 }
 
 // NORMALIZE
