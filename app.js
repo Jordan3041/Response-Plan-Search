@@ -38,26 +38,31 @@ const agencyColors = {
 
 // 🔹 Load JSON Data
 let data = [];
+
 fetch('data.json')
   .then(res => res.json())
   .then(json => {
-    data = json;
+    // 🔧 Clean data coming from Excel
+    data = json.map(item => ({
+      ...item,
+      determinant: String(item.determinant).trim(),
+      description: item.description ? String(item.description).trim() : "",
+      level: item.level ? String(item.level).trim() : ""
+    }));
   })
   .catch(err => {
     console.error(err);
     resultDiv.innerHTML = `<p>Error loading data</p>`;
   });
 
-// 🔹 Normalize Determinant (ignore dashes, spaces, leading zeros)
+// 🔹 Normalize Determinant (VERY ROBUST)
 function normalizeDeterminant(str) {
   if (!str) return '';
 
-  return str
+  return String(str)
     .toUpperCase()
-    .split(/[^A-Z0-9]/g)
-    .filter(Boolean)
-    .map(part => /^\d+$/.test(part) ? String(Number(part)) : part)
-    .join('');
+    .replace(/[^A-Z0-9]/g, '')       // remove dashes, spaces, etc.
+    .replace(/(\d+)/g, (num) => String(Number(num))); // remove ALL leading zeros
 }
 
 // 🔍 Perform Search
@@ -84,7 +89,7 @@ function performSearch() {
   let agencyHTML = '';
 
   for (const agency in match.agencies) {
-    const color = agencyColors[agency] || "#60a5fa"; // fallback color
+    const color = agencyColors[agency] || "#60a5fa";
 
     agencyHTML += `
       <div style="
@@ -109,7 +114,7 @@ function performSearch() {
   // 🚨 Render Result
   resultDiv.innerHTML = `
     <div class="result-card">
-      <h2>${match.determinant} - ${match.description || ''}</h2>
+      <h2>${match.determinant} - ${match.description}</h2>
 
       <p class="level-${match.level.toLowerCase()}" style="font-size:18px;">
         <strong>${match.level}</strong>
@@ -137,10 +142,10 @@ function performSearch() {
   `;
 }
 
-// 🔹 Event Listeners
+// 🔹 Live Search
 searchInput.addEventListener('input', performSearch);
 
-// 🔹 Support Enter key (mobile keyboard search button)
+// 🔹 Support Enter Key (mobile keyboards)
 searchInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     performSearch();
