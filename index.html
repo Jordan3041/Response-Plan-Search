@@ -136,12 +136,6 @@
   color: white;
     }
 
-    /* Highlight selected autocomplete item */
-    .autocomplete-active {
-  background: #2563eb !important;
-  color: white;
-    }
-
     /* Admin Panel */
     #admin-panel {
   max-width: 500px;
@@ -156,22 +150,28 @@
 </head>
 
 <body>
+
 <!-- ACCESS -->
-<div id="access-section">
-  <h2>Enter Access Key</h2>
-  <input id="access-key">
-  <button id="access-submit">Enter</button>
-</div>
+  <div id="access-section" class="card">
+    <h2>Secure Access</h2>
+    <input type="password" id="access-key" placeholder="Enter Access Key">
+    <button id="access-submit">Enter</button>
+  </div>
 
-<!-- MAIN APP -->
-<div id="main-app" style="display:none;">
+  <!-- 🚒 Main App -->
+  <div id="main-app" style="display:none;">
 
-  <h1 id="agency-banner"></h1>
+    <!-- Controls -->
+    <div class="card">
+      <h1>Ada County Fire/EMS Response Plan Search</h1>
+      <input id="search" placeholder="Enter determinant (e.g. 69-E-06)">
+      <div id="autocomplete-list" class="autocomplete-items"></div>
+    </div>
 
-  <input id="search" placeholder="Enter determinant (ex: 69-E-06)">
-  <div id="autocomplete-list"></div>
+    <!-- Results -->
+    <div id="result"></div>
 
-  <div id="result"></div>
+  </div>
 
   <!-- ADMIN -->
   <div id="admin-panel" style="display:none;">
