@@ -8,15 +8,12 @@ const accessSection = document.getElementById('access-section');
 const mainApp = document.getElementById('main-app');
 const accessButton = document.getElementById('access-submit');
 
-// 🔓 Handle Access
 accessButton.addEventListener('click', () => {
   if (accessInput.value === accessKey) {
     accessSection.style.display = 'none';
     mainApp.style.display = 'block';
 
-    setTimeout(() => {
-      searchInput.focus();
-    }, 100);
+    setTimeout(() => searchInput.focus(), 100);
   } else {
     alert('Incorrect access key');
   }
@@ -36,18 +33,18 @@ const agencyColors = {
   "Kuna Fire": "#14b8a6"
 };
 
-// 🔹 Data
 let data = [];
+let currentFocus = -1;
 
-// 🔹 Load JSON
+// 🔹 Load Data
 fetch('data.json')
   .then(res => res.json())
   .then(json => {
     data = json.map(item => ({
       ...item,
       determinant: String(item.determinant).trim(),
-      description: item.description ? String(item.description).trim() : "",
-      level: item.level ? String(item.level).trim() : ""
+      description: item.description || "",
+      level: item.level || ""
     }));
   });
 
@@ -59,7 +56,7 @@ function normalizeDeterminant(str) {
     .replace(/(\d+)/g, num => String(Number(num)));
 }
 
-// 🔍 SEARCH FUNCTION
+// 🔍 Search
 function performSearch(queryOverride = null) {
   const rawQuery = queryOverride || searchInput.value;
 
@@ -87,7 +84,7 @@ function performSearch(queryOverride = null) {
     agencyHTML += `
       <div style="margin-bottom:10px; padding:10px; border-radius:8px; background: rgba(255,255,255,0.04);">
         <strong style="color:${color};">${agency}:</strong>
-        <div style="margin-top:4px;">${match.agencies[agency]}</div>
+        <div>${match.agencies[agency]}</div>
       </div>
     `;
   }
@@ -97,15 +94,16 @@ function performSearch(queryOverride = null) {
       <h2>${match.determinant} - ${match.description}</h2>
       <p class="level-${match.level.toLowerCase()}"><strong>${match.level}</strong></p>
       ${agencyHTML}
-      ${match.notes ? `<div style="margin-top:10px;"><strong>Notes:</strong> ${match.notes}</div>` : ''}
+      ${match.notes ? `<div><strong>Notes:</strong> ${match.notes}</div>` : ''}
     </div>
   `;
 }
 
-// 🔮 AUTOCOMPLETE
+// 🔮 Autocomplete
 searchInput.addEventListener('input', () => {
   const input = searchInput.value;
   autocompleteList.innerHTML = '';
+  currentFocus = -1;
 
   if (!input) return;
 
@@ -115,15 +113,13 @@ searchInput.addEventListener('input', () => {
     .filter(item =>
       normalizeDeterminant(item.determinant).startsWith(normalizedInput)
     )
-    .slice(0, 10); // limit results
+    .slice(0, 10);
 
-  matches.forEach(item => {
+  matches.forEach((item, index) => {
     const div = document.createElement('div');
     div.classList.add('autocomplete-item');
 
-    div.innerHTML = `
-      <strong>${item.determinant}</strong> - ${item.description}
-    `;
+    div.innerHTML = `<strong>${item.determinant}</strong> - ${item.description}`;
 
     div.addEventListener('click', () => {
       searchInput.value = item.determinant;
@@ -137,17 +133,50 @@ searchInput.addEventListener('input', () => {
   performSearch();
 });
 
-// 🔹 Close autocomplete if clicking outside
-document.addEventListener('click', (e) => {
-  if (e.target !== searchInput) {
-    autocompleteList.innerHTML = '';
+// ⬆️⬇️ Keyboard Navigation
+searchInput.addEventListener('keydown', (e) => {
+  const items = autocompleteList.getElementsByClassName('autocomplete-item');
+
+  if (e.key === 'ArrowDown') {
+    currentFocus++;
+    addActive(items);
+  } 
+  else if (e.key === 'ArrowUp') {
+    currentFocus--;
+    addActive(items);
+  } 
+  else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (currentFocus > -1 && items[currentFocus]) {
+      items[currentFocus].click();
+    } else {
+      performSearch();
+    }
   }
 });
 
-// 🔹 Enter key
-searchInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
+// 🔹 Highlight active item
+function addActive(items) {
+  if (!items) return;
+
+  removeActive(items);
+
+  if (currentFocus >= items.length) currentFocus = 0;
+  if (currentFocus < 0) currentFocus = items.length - 1;
+
+  items[currentFocus].classList.add('autocomplete-active');
+}
+
+// 🔹 Remove highlight
+function removeActive(items) {
+  for (let item of items) {
+    item.classList.remove('autocomplete-active');
+  }
+}
+
+// 🔹 Close autocomplete when clicking outside
+document.addEventListener('click', (e) => {
+  if (e.target !== searchInput) {
     autocompleteList.innerHTML = '';
-    performSearch();
   }
 });
