@@ -8,69 +8,87 @@
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', Roboto, sans-serif;
+      font-family: "Segoe UI", Roboto, sans-serif;
       background: radial-gradient(circle at top, #1f2937, #020617);
       color: #e5e7eb;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
     }
 
-    /* Containers */
-    #main-app {
+    .app-shell {
       width: 100%;
       max-width: 520px;
-      text-align: center;
     }
 
     .card {
       background: rgba(15, 23, 42, 0.9);
       border-radius: 16px;
       padding: 25px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(10px);
       margin-bottom: 20px;
+      box-sizing: border-box;
     }
 
     h1 {
-      margin-bottom: 20px;
+      margin: 0 0 20px;
       font-size: 26px;
       font-weight: 600;
+      text-align: center;
     }
 
     h2 {
-      margin-bottom: 15px;
+      margin: 0 0 15px;
       font-weight: 500;
+      text-align: center;
     }
 
-    /* Inputs */
-    input, select {
+    h3 {
+      margin-top: 0;
+    }
+
+    input,
+    select,
+    textarea,
+    button {
       width: 100%;
+      box-sizing: border-box;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    input,
+    select,
+    textarea {
       padding: 14px;
       margin: 10px 0;
-      border-radius: 10px;
       border: none;
-      font-size: 18px;
       background: #111827;
       color: #e5e7eb;
       outline: none;
     }
 
-    input::placeholder {
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
       color: #6b7280;
     }
 
-    /* Button */
     button {
-      width: 100%;
       padding: 14px;
       margin-top: 10px;
-      border-radius: 10px;
       border: none;
       background: linear-gradient(135deg, #2563eb, #1d4ed8);
       color: white;
-      font-size: 16px;
       font-weight: 600;
       cursor: pointer;
       transition: 0.2s ease;
@@ -81,7 +99,59 @@
       box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4);
     }
 
-    /* Result Card */
+    #access-section {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    #access-section input {
+      text-align: center;
+    }
+
+    #main-app {
+      display: none;
+    }
+
+    #agency-banner {
+      margin-bottom: 14px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: #0f172a;
+      border: 1px solid #1f2937;
+      text-align: center;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #60a5fa;
+    }
+
+    .autocomplete-items {
+      position: relative;
+      width: 100%;
+      text-align: left;
+      margin-top: -8px;
+      z-index: 10;
+    }
+
+    .autocomplete-item {
+      padding: 12px;
+      background: #020617;
+      border-bottom: 1px solid #1f2937;
+      cursor: pointer;
+    }
+
+    .autocomplete-item:hover {
+      background: #1e293b;
+    }
+
+    .autocomplete-item strong {
+      color: #60a5fa;
+    }
+
+    .autocomplete-active {
+      background: #2563eb !important;
+      color: white;
+    }
+
     .result-card {
       padding: 20px;
       border-radius: 14px;
@@ -91,121 +161,77 @@
       text-align: left;
     }
 
-    /* Priority Colors */
-    .level-alpha { color: #22c55e; }
-    .level-bravo { color: #eab308; }
-    .level-charlie { color: #f97316; }
-    .level-delta { color: #ef4444; }
-    .level-echo { color: #ec4899; }
-
-    /* Access section */
-    #access-section {
-      width: 100%;
-      max-width: 400px;
+    #result {
+      margin-top: 10px;
     }
 
-    #access-section input {
-      text-align: center;
-    }
-
-    .autocomplete-items {
-  position: relative;
-  width: 100%;
-  text-align: left;
-  margin-top: -8px;
-    }
-
-    .autocomplete-item {
-  padding: 12px;
-  background: #020617;
-  border-bottom: 1px solid #1f2937;
-  cursor: pointer;
-    }
-
-    .autocomplete-item:hover {
-  background: #1e293b;
-    }
-
-    .autocomplete-item strong {
-  color: #60a5fa;
-    }
-
-    /* Highlight selected autocomplete item */
-    .autocomplete-active {
-  background: #2563eb !important;
-  color: white;
-    }
-
-    /* Admin Panel */
     #admin-panel {
-  max-width: 500px;
-  margin: 30px auto;
+      display: none;
     }
 
-    #admin-panel textarea {
-  min-height: 80px;
+    .danger-button {
+      background: #dc2626;
     }
-    
+
+    .danger-button:hover {
+      box-shadow: 0 5px 15px rgba(220, 38, 38, 0.35);
+    }
   </style>
 </head>
-
 <body>
+  <div class="app-shell">
 
-<!-- ACCESS -->
-  <div id="access-section" class="card">
-    <h2>Secure Access</h2>
-    <input type="password" id="access-key" placeholder="Enter Access Key">
-    <button id="access-submit">Enter</button>
-  </div>
-
-  <!-- 🚒 Main App -->
-  <div id="main-app" style="display:none;">
-
-    <!-- Controls -->
-    <div class="card">
-      <h1>Ada County Fire/EMS Response Plan Search</h1>
-      <input id="search" placeholder="Enter determinant (e.g. 69-E-06)">
-      <div id="autocomplete-list" class="autocomplete-items"></div>
+    <!-- ACCESS -->
+    <div id="access-section" class="card">
+      <h2>Secure Access</h2>
+      <input type="password" id="access-key" placeholder="Enter Access Key">
+      <button id="access-submit" type="button">Enter</button>
     </div>
 
-    <!-- Results -->
-    <div id="result"></div>
+    <!-- MAIN APP -->
+    <div id="main-app">
+      <div class="card">
+        <div id="agency-banner">AGENCY</div>
+        <h1>Ada County Fire/EMS Response Plan Search</h1>
+        <input id="search" type="text" placeholder="Enter determinant (e.g. 69-E-06)" autocomplete="off">
+        <div id="autocomplete-list" class="autocomplete-items"></div>
+      </div>
+
+      <div id="result"></div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="admin-panel" class="card">
+      <h3>Admin Editor</h3>
+
+      <input id="edit-determinant" type="text" placeholder="Determinant">
+      <input id="edit-description" type="text" placeholder="Description">
+      <input id="edit-level" type="text" placeholder="Level">
+
+      <select id="agency-select">
+        <option>Boise Fire</option>
+        <option>Meridian Fire</option>
+        <option>Eagle Fire</option>
+        <option>Kuna Fire</option>
+        <option>Nampa Fire</option>
+        <option>Caldwell Fire</option>
+        <option>MidStar</option>
+      </select>
+
+      <textarea id="edit-agency-response" placeholder="Response Plan"></textarea>
+      <textarea id="edit-notes" placeholder="Notes"></textarea>
+
+      <button type="button" onclick="saveEntry()">Save</button>
+      <button type="button" onclick="exportJSON()">Export JSON</button>
+
+      <input type="file" id="import-file" accept=".json">
+      <button type="button" onclick="importJSON()">Import JSON</button>
+
+      <button type="button" class="danger-button" onclick="exitAdmin()">Exit Admin</button>
+    </div>
 
   </div>
 
-  <!-- ADMIN -->
-  <div id="admin-panel" style="display:none;">
-    <h3>Admin Editor</h3>
-
-    <input id="edit-determinant" placeholder="Determinant">
-    <input id="edit-description" placeholder="Description">
-    <input id="edit-level" placeholder="Level">
-
-    <select id="agency-select">
-      <option>Boise Fire</option>
-      <option>Meridian Fire</option>
-      <option>Eagle Fire</option>
-      <option>Kuna Fire</option>
-      <option>Nampa Fire</option>
-      <option>Caldwell Fire</option>
-      <option>MidStar</option>
-    </select>
-
-    <textarea id="edit-agency-response" placeholder="Response Plan"></textarea>
-
-    <textarea id="edit-notes" placeholder="Notes"></textarea>
-
-    <button onclick="saveEntry()">Save</button>
-    <button onclick="exportJSON()">Export JSON</button>
-
-    <input type="file" id="import-file" accept=".json">
-    <button onclick="importJSON()">Import JSON</button>
-
-    <button onclick="exitAdmin()" style="background:#dc2626;">Exit Admin</button>
-  </div>
-
-</div>
-
-<script src="app.js"></script>
+  <script src="app.js?v=2" defer></script>
 </body>
 </html>
