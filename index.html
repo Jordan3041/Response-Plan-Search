@@ -2,168 +2,110 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Fire/EMS Response Plan Search</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fire/EMS Response Plan Search</title>
 
   <style>
     body {
-      margin: 0;
-      font-family: 'Segoe UI', Roboto, sans-serif;
-      background: radial-gradient(circle at top, #1f2937, #020617);
-      color: #e5e7eb;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    /* Containers */
-    #main-app {
-      width: 100%;
-      max-width: 520px;
-      text-align: center;
-    }
-
-    .card {
-      background: rgba(15, 23, 42, 0.9);
-      border-radius: 16px;
-      padding: 25px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-      backdrop-filter: blur(10px);
-      margin-bottom: 20px;
-    }
-
-    h1 {
-      margin-bottom: 20px;
-      font-size: 26px;
-      font-weight: 600;
-    }
-
-    h2 {
-      margin-bottom: 15px;
-      font-weight: 500;
-    }
-
-    /* Inputs */
-    input, select {
-      width: 100%;
-      padding: 14px;
-      margin: 10px 0;
-      border-radius: 10px;
-      border: none;
-      font-size: 18px;
-      background: #111827;
-      color: #e5e7eb;
-      outline: none;
-    }
-
-    input::placeholder {
-      color: #6b7280;
-    }
-
-    /* Button */
-    button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 10px;
-      border-radius: 10px;
-      border: none;
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      font-family: Arial;
+      background: #020617;
       color: white;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s ease;
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4);
-    }
-
-    /* Result Card */
-    .result-card {
+      text-align: center;
       padding: 20px;
-      border-radius: 14px;
+    }
+
+    input, textarea, button {
+      width: 90%;
+      max-width: 500px;
+      margin: 8px;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+    }
+
+    .result-card {
+      margin-top: 20px;
+      padding: 20px;
       background: #020617;
       border: 1px solid #1f2937;
-      font-size: 16px;
-      text-align: left;
-    }
-
-    /* Priority Colors */
-    .level-alpha { color: #22c55e; }
-    .level-bravo { color: #eab308; }
-    .level-charlie { color: #f97316; }
-    .level-delta { color: #ef4444; }
-    .level-echo { color: #ec4899; }
-
-    /* Access section */
-    #access-section {
-      width: 100%;
-      max-width: 400px;
-    }
-
-    #access-section input {
-      text-align: center;
+      border-radius: 10px;
     }
 
     .autocomplete-items {
-  position: relative;
-  width: 100%;
-  text-align: left;
-  margin-top: -8px;
+      text-align: left;
+      max-width: 500px;
+      margin: auto;
     }
 
     .autocomplete-item {
-  padding: 12px;
-  background: #020617;
-  border-bottom: 1px solid #1f2937;
-  cursor: pointer;
+      padding: 10px;
+      background: #020617;
+      border-bottom: 1px solid #1f2937;
+      cursor: pointer;
     }
 
     .autocomplete-item:hover {
-  background: #1e293b;
+      background: #1e293b;
     }
 
-    .autocomplete-item strong {
-  color: #60a5fa;
-    }
-
-    /* Highlight selected autocomplete item */
     .autocomplete-active {
-  background: #2563eb !important;
-  color: white;
+      background: #2563eb !important;
     }
-    
   </style>
 </head>
 
 <body>
 
-  <!-- 🔐 Access Key -->
-  <div id="access-section" class="card">
-    <h2>Secure Access</h2>
-    <input type="password" id="access-key" placeholder="Enter Access Key">
+  <!-- ACCESS -->
+  <div id="access-section">
+    <h2>Enter Access Key</h2>
+    <input id="access-key">
     <button id="access-submit">Enter</button>
   </div>
 
-  <!-- 🚒 Main App -->
+  <!-- MAIN APP -->
   <div id="main-app" style="display:none;">
 
-    <!-- Controls -->
-    <div class="card">
-      <h1>Fire/EMS Response Plan Search</h1>
-      <input id="search" placeholder="Enter determinant (e.g. 69-E-06)">
-      <div id="autocomplete-list" class="autocomplete-items"></div>
-    </div>
+    <h1 id="agency-banner"></h1>
 
-    <!-- Results -->
+    <input id="search" placeholder="Enter determinant">
+
+    <div id="autocomplete-list"></div>
+
     <div id="result"></div>
+
+    <!-- ADMIN PANEL -->
+    <div id="admin-panel" style="display:none;">
+      <h3>Admin Editor</h3>
+
+      <input id="edit-determinant" placeholder="Determinant">
+      <input id="edit-description" placeholder="Description">
+      <input id="edit-level" placeholder="Level">
+
+      <textarea id="edit-boise" placeholder="Boise Fire"></textarea>
+      <textarea id="edit-meridian" placeholder="Meridian Fire"></textarea>
+      <textarea id="edit-eagle" placeholder="Eagle Fire"></textarea>
+      <textarea id="edit-kuna" placeholder="Kuna Fire"></textarea>
+      <textarea id="edit-midstar" placeholder="MidStar"></textarea>
+
+      <textarea id="edit-notes" placeholder="Notes"></textarea>
+
+      <button onclick="saveEntry()">Save</button>
+      <button onclick="exportJSON()">Export JSON</button>
+
+      <input type="file" id="import-file" accept=".json">
+      <button onclick="importJSON()">Import JSON</button>
+    </div>
 
   </div>
 
   <script src="app.js"></script>
-
 </body>
 </html>
