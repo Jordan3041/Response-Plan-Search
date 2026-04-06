@@ -1,54 +1,80 @@
-// app.js
+// ACCESS MAP
+const accessMap = {
+  "911": { file: "data.json", name: "Default" },
+  "ada911": { file: "ada_data.json", name: "Ada County" },
+  "canyon911": { file: "canyon_data.json", name: "Canyon County" }
+};
 
-// 🔐 Access Key
-const accessKey = "911";
+const adminKey = "admin911";
 
+let data = [];
+let isAdmin = false;
+let currentFocus = -1;
+
+// ELEMENTS
 const accessInput = document.getElementById('access-key');
 const accessSection = document.getElementById('access-section');
 const mainApp = document.getElementById('main-app');
 const accessButton = document.getElementById('access-submit');
 
-accessButton.addEventListener('click', () => {
-  if (accessInput.value === accessKey) {
-    accessSection.style.display = 'none';
-    mainApp.style.display = 'block';
-
-    setTimeout(() => searchInput.focus(), 100);
-  } else {
-    alert('Incorrect access key');
-  }
-});
-
-// 🔹 Elements
 const searchInput = document.getElementById('search');
 const resultDiv = document.getElementById('result');
 const autocompleteList = document.getElementById('autocomplete-list');
+const agencyBanner = document.getElementById('agency-banner');
 
-// 🎨 Agency Colors
+// COLORS
 const agencyColors = {
   "Boise Fire": "#f97316",
+  "Caldwell Fire": "#f80202",
   "Meridian Fire": "#ec4899",
   "Eagle Fire": "#eab308",
   "MidStar": "#a855f7",
+  "Nampa Fire": "#f80202",
   "Kuna Fire": "#14b8a6"
 };
 
-let data = [];
-let currentFocus = -1;
+// LOGIN
+accessButton.addEventListener('click', () => {
+  const key = accessInput.value.trim();
 
-// 🔹 Load Data
-fetch('data.json')
-  .then(res => res.json())
-  .then(json => {
-    data = json.map(item => ({
-      ...item,
-      determinant: String(item.determinant).trim(),
-      description: item.description || "",
-      level: item.level || ""
-    }));
-  });
+  if (key === adminKey) {
+    isAdmin = true;
+    loadData("data.json", "ADMIN MODE");
+    return;
+  }
 
-// 🔹 Normalize
+  const config = accessMap[key];
+
+  if (!config) {
+    alert("Invalid key");
+    return;
+  }
+
+  loadData(config.file, config.name);
+});
+
+// LOAD DATA
+function loadData(file, name) {
+  fetch(file)
+    .then(res => res.json())
+    .then(json => {
+      data = json;
+
+      accessSection.style.display = 'none';
+      mainApp.style.display = 'block';
+
+      agencyBanner.innerText = name.toUpperCase();
+
+      if (isAdmin) {
+        document.getElementById('admin-panel').style.display = 'block';
+      }
+
+      searchInput.focus();
+    })
+    .catch(() => alert("Error loading data file"));
+}
+
+// NORMALIZE
 function normalizeDeterminant(str) {
   return String(str || '')
     .toUpperCase()
@@ -56,34 +82,32 @@ function normalizeDeterminant(str) {
     .replace(/(\d+)/g, num => String(Number(num)));
 }
 
-// 🔍 Search
+// SEARCH
 function performSearch(queryOverride = null) {
-  const rawQuery = queryOverride || searchInput.value;
+  const raw = queryOverride || searchInput.value;
+  if (!raw) return;
 
-  if (!rawQuery) {
-    resultDiv.innerHTML = '';
-    return;
-  }
+  const query = normalizeDeterminant(raw);
 
-  const query = normalizeDeterminant(rawQuery);
-
-  const match = data.find(item =>
-    normalizeDeterminant(item.determinant) === query
+  const match = data.find(d =>
+    normalizeDeterminant(d.determinant) === query
   );
 
   if (!match) {
-    resultDiv.innerHTML = `<p>No match found</p>`;
+    resultDiv.innerHTML = "<p>No match found</p>";
     return;
   }
 
-  let agencyHTML = '';
+  if (isAdmin) loadIntoEditor(match);
+
+  let html = "";
 
   for (const agency in match.agencies) {
     const color = agencyColors[agency] || "#60a5fa";
 
-    agencyHTML += `
-      <div style="margin-bottom:10px; padding:10px; border-radius:8px; background: rgba(255,255,255,0.04);">
-        <strong style="color:${color};">${agency}:</strong>
+    html += `
+      <div style="margin:10px;padding:10px;border-radius:8px;background:#111;">
+        <strong style="color:${color}">${agency}</strong>
         <div>${match.agencies[agency]}</div>
       </div>
     `;
@@ -92,40 +116,35 @@ function performSearch(queryOverride = null) {
   resultDiv.innerHTML = `
     <div class="result-card">
       <h2>${match.determinant} - ${match.description}</h2>
-      <p class="level-${match.level.toLowerCase()}"><strong>${match.level}</strong></p>
-      ${agencyHTML}
-      ${match.notes ? `<div><strong>Notes:</strong> ${match.notes}</div>` : ''}
+      <p>${match.level}</p>
+      ${html}
+      ${match.notes ? `<div><strong>Notes:</strong> ${match.notes}</div>` : ""}
     </div>
   `;
 }
 
-// 🔮 Autocomplete
+// AUTOCOMPLETE
 searchInput.addEventListener('input', () => {
-  const input = searchInput.value;
+  const val = searchInput.value;
   autocompleteList.innerHTML = '';
   currentFocus = -1;
 
-  if (!input) return;
+  if (!val) return;
 
-  const normalizedInput = normalizeDeterminant(input);
+  const matches = data.filter(d =>
+    normalizeDeterminant(d.determinant).startsWith(normalizeDeterminant(val))
+  ).slice(0, 10);
 
-  const matches = data
-    .filter(item =>
-      normalizeDeterminant(item.determinant).startsWith(normalizedInput)
-    )
-    .slice(0, 10);
-
-  matches.forEach((item, index) => {
+  matches.forEach(item => {
     const div = document.createElement('div');
     div.classList.add('autocomplete-item');
+    div.innerHTML = `<strong>${item.determinant}</strong>`;
 
-    div.innerHTML = `<strong>${item.determinant}</strong> - ${item.description}`;
-
-    div.addEventListener('click', () => {
+    div.onclick = () => {
       searchInput.value = item.determinant;
-      autocompleteList.innerHTML = '';
       performSearch(item.determinant);
-    });
+      autocompleteList.innerHTML = '';
+    };
 
     autocompleteList.appendChild(div);
   });
@@ -133,50 +152,93 @@ searchInput.addEventListener('input', () => {
   performSearch();
 });
 
-// ⬆️⬇️ Keyboard Navigation
+// KEYBOARD NAV
 searchInput.addEventListener('keydown', (e) => {
-  const items = autocompleteList.getElementsByClassName('autocomplete-item');
+  const items = autocompleteList.children;
 
-  if (e.key === 'ArrowDown') {
-    currentFocus++;
-    addActive(items);
-  } 
-  else if (e.key === 'ArrowUp') {
-    currentFocus--;
-    addActive(items);
-  } 
-  else if (e.key === 'Enter') {
+  if (e.key === 'ArrowDown') currentFocus++;
+  if (e.key === 'ArrowUp') currentFocus--;
+
+  if (e.key === 'Enter') {
     e.preventDefault();
-    if (currentFocus > -1 && items[currentFocus]) {
-      items[currentFocus].click();
-    } else {
-      performSearch();
-    }
+    if (items[currentFocus]) items[currentFocus].click();
+  }
+
+  for (let i = 0; i < items.length; i++) {
+    items[i].classList.remove('autocomplete-active');
+  }
+
+  if (items[currentFocus]) {
+    items[currentFocus].classList.add('autocomplete-active');
   }
 });
 
-// 🔹 Highlight active item
-function addActive(items) {
-  if (!items) return;
+// ADMIN LOAD
+function loadIntoEditor(d) {
+  document.getElementById('edit-determinant').value = d.determinant;
+  document.getElementById('edit-description').value = d.description;
+  document.getElementById('edit-level').value = d.level;
+  document.getElementById('edit-notes').value = d.notes || "";
 
-  removeActive(items);
+  const agency = document.getElementById('agency-select').value;
 
-  if (currentFocus >= items.length) currentFocus = 0;
-  if (currentFocus < 0) currentFocus = items.length - 1;
-
-  items[currentFocus].classList.add('autocomplete-active');
+  document.getElementById('edit-agency-response').value =
+    d.agencies[agency] || "";
 }
 
-// 🔹 Remove highlight
-function removeActive(items) {
-  for (let item of items) {
-    item.classList.remove('autocomplete-active');
-  }
-}
-
-// 🔹 Close autocomplete when clicking outside
-document.addEventListener('click', (e) => {
-  if (e.target !== searchInput) {
-    autocompleteList.innerHTML = '';
-  }
+// SWITCH AGENCY
+document.getElementById('agency-select').addEventListener('change', () => {
+  performSearch();
 });
+
+// SAVE
+function saveEntry() {
+  const det = document.getElementById('edit-determinant').value;
+  const agency = document.getElementById('agency-select').value;
+  const response = document.getElementById('edit-agency-response').value;
+
+  const i = data.findIndex(d =>
+    normalizeDeterminant(d.determinant) === normalizeDeterminant(det)
+  );
+
+  if (i > -1) {
+    data[i].agencies[agency] = response;
+  } else {
+    data.push({
+      determinant: det,
+      description: document.getElementById('edit-description').value,
+      level: document.getElementById('edit-level').value,
+      agencies: { [agency]: response },
+      notes: document.getElementById('edit-notes').value
+    });
+  }
+
+  alert("Saved (export to keep)");
+}
+
+// EXPORT
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(data, null, 2)]);
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "data.json";
+  a.click();
+}
+
+// IMPORT
+function importJSON() {
+  const file = document.getElementById('import-file').files[0];
+  if (!file) return alert("Select file");
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    data = JSON.parse(e.target.result);
+    alert("Imported!");
+  };
+  reader.readAsText(file);
+}
+
+// EXIT ADMIN
+function exitAdmin() {
+  location.reload();
+}

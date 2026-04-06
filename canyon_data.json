@@ -1,0 +1,20 @@
+[
+  {
+    "determinant": "10A01",
+    "description": "CHESTPN - Chest pain",
+    "level": "P1E - Alpha",
+    "agencies": {
+      "Nampa Fire": "1 Medic 1 Engine",
+      "Caldwell Fire": "1 Medic 1 Engine"
+    }
+  },
+  {
+    "determinant": "10C00",
+    "description": "CHESTPN - Chest pain",
+    "level": "P4E - Charlie",
+    "agencies": {
+      "Nampa Fire": "1 Medic 1 Engine",
+      "Caldwell Fire": "1 Medic 1 Engine"
+    }
+  },
+]

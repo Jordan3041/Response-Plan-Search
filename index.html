@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ada County Fire/EMS Response Plan Search</title>
+  <title>Fire/EMS Response Plan Search</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -135,13 +135,23 @@
   background: #2563eb !important;
   color: white;
     }
+
+    /* Admin Panel */
+    #admin-panel {
+  max-width: 500px;
+  margin: 30px auto;
+    }
+
+    #admin-panel textarea {
+  min-height: 80px;
+    }
     
   </style>
 </head>
 
 <body>
 
-  <!-- 🔐 Access Key -->
+<!-- ACCESS -->
   <div id="access-section" class="card">
     <h2>Secure Access</h2>
     <input type="password" id="access-key" placeholder="Enter Access Key">
@@ -163,7 +173,39 @@
 
   </div>
 
-  <script src="app.js"></script>
+  <!-- ADMIN -->
+  <div id="admin-panel" style="display:none;">
+    <h3>Admin Editor</h3>
 
+    <input id="edit-determinant" placeholder="Determinant">
+    <input id="edit-description" placeholder="Description">
+    <input id="edit-level" placeholder="Level">
+
+    <select id="agency-select">
+      <option>Boise Fire</option>
+      <option>Meridian Fire</option>
+      <option>Eagle Fire</option>
+      <option>Kuna Fire</option>
+      <option>Nampa Fire</option>
+      <option>Caldwell Fire</option>
+      <option>MidStar</option>
+    </select>
+
+    <textarea id="edit-agency-response" placeholder="Response Plan"></textarea>
+
+    <textarea id="edit-notes" placeholder="Notes"></textarea>
+
+    <button onclick="saveEntry()">Save</button>
+    <button onclick="exportJSON()">Export JSON</button>
+
+    <input type="file" id="import-file" accept=".json">
+    <button onclick="importJSON()">Import JSON</button>
+
+    <button onclick="exitAdmin()" style="background:#dc2626;">Exit Admin</button>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
