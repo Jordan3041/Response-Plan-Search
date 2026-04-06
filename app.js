@@ -1,4 +1,4 @@
-// 🔐 ACCESS MAP
+// ACCESS MAP
 const accessMap = {
   "911": { file: "data.json", name: "Default" },
   "ada911": { file: "ada_data.json", name: "Ada County" },
@@ -25,15 +25,15 @@ const agencyBanner = document.getElementById('agency-banner');
 // COLORS
 const agencyColors = {
   "Boise Fire": "#f97316",
+  "Caldwell Fire": "#f80202",
   "Meridian Fire": "#ec4899",
   "Eagle Fire": "#eab308",
   "MidStar": "#a855f7",
   "Nampa Fire": "#f80202",
-  "Caldwell Fire": "#f80202",
   "Kuna Fire": "#14b8a6"
 };
 
-// ACCESS LOGIN
+// LOGIN
 accessButton.addEventListener('click', () => {
   const key = accessInput.value.trim();
 
@@ -71,7 +71,7 @@ function loadData(file, name) {
 
       searchInput.focus();
     })
-    .catch(() => alert("Error loading file"));
+    .catch(() => alert("Error loading data file"));
 }
 
 // NORMALIZE
@@ -85,7 +85,6 @@ function normalizeDeterminant(str) {
 // SEARCH
 function performSearch(queryOverride = null) {
   const raw = queryOverride || searchInput.value;
-
   if (!raw) return;
 
   const query = normalizeDeterminant(raw);
@@ -95,7 +94,7 @@ function performSearch(queryOverride = null) {
   );
 
   if (!match) {
-    resultDiv.innerHTML = "No match";
+    resultDiv.innerHTML = "<p>No match found</p>";
     return;
   }
 
@@ -116,10 +115,10 @@ function performSearch(queryOverride = null) {
 
   resultDiv.innerHTML = `
     <div class="result-card">
-      <h2>${match.determinant}</h2>
+      <h2>${match.determinant} - ${match.description}</h2>
       <p>${match.level}</p>
       ${html}
-      ${match.notes || ""}
+      ${match.notes ? `<div><strong>Notes:</strong> ${match.notes}</div>` : ""}
     </div>
   `;
 }
@@ -139,7 +138,7 @@ searchInput.addEventListener('input', () => {
   matches.forEach(item => {
     const div = document.createElement('div');
     div.classList.add('autocomplete-item');
-    div.innerHTML = `${item.determinant}`;
+    div.innerHTML = `<strong>${item.determinant}</strong>`;
 
     div.onclick = () => {
       searchInput.value = item.determinant;
@@ -174,48 +173,50 @@ searchInput.addEventListener('keydown', (e) => {
   }
 });
 
-// ADMIN FUNCTIONS
+// ADMIN LOAD
 function loadIntoEditor(d) {
   document.getElementById('edit-determinant').value = d.determinant;
   document.getElementById('edit-description').value = d.description;
   document.getElementById('edit-level').value = d.level;
-
-  document.getElementById('edit-boise').value = d.agencies["Boise Fire"] || "";
-  document.getElementById('edit-meridian').value = d.agencies["Meridian Fire"] || "";
-  document.getElementById('edit-eagle').value = d.agencies["Eagle Fire"] || "";
-  document.getElementById('edit-kuna').value = d.agencies["Kuna Fire"] || "";
-  document.getElementById('edit-midstar').value = d.agencies["MidStar"] || "";
-
   document.getElementById('edit-notes').value = d.notes || "";
+
+  const agency = document.getElementById('agency-select').value;
+
+  document.getElementById('edit-agency-response').value =
+    d.agencies[agency] || "";
 }
 
+// SWITCH AGENCY
+document.getElementById('agency-select').addEventListener('change', () => {
+  performSearch();
+});
+
+// SAVE
 function saveEntry() {
   const det = document.getElementById('edit-determinant').value;
-
-  const newEntry = {
-    determinant: det,
-    description: document.getElementById('edit-description').value,
-    level: document.getElementById('edit-level').value,
-    agencies: {
-      "Boise Fire": document.getElementById('edit-boise').value,
-      "Meridian Fire": document.getElementById('edit-meridian').value,
-      "Eagle Fire": document.getElementById('edit-eagle').value,
-      "Kuna Fire": document.getElementById('edit-kuna').value,
-      "MidStar": document.getElementById('edit-midstar').value
-    },
-    notes: document.getElementById('edit-notes').value
-  };
+  const agency = document.getElementById('agency-select').value;
+  const response = document.getElementById('edit-agency-response').value;
 
   const i = data.findIndex(d =>
     normalizeDeterminant(d.determinant) === normalizeDeterminant(det)
   );
 
-  if (i > -1) data[i] = newEntry;
-  else data.push(newEntry);
+  if (i > -1) {
+    data[i].agencies[agency] = response;
+  } else {
+    data.push({
+      determinant: det,
+      description: document.getElementById('edit-description').value,
+      level: document.getElementById('edit-level').value,
+      agencies: { [agency]: response },
+      notes: document.getElementById('edit-notes').value
+    });
+  }
 
   alert("Saved (export to keep)");
 }
 
+// EXPORT
 function exportJSON() {
   const blob = new Blob([JSON.stringify(data, null, 2)]);
   const a = document.createElement("a");
@@ -224,6 +225,7 @@ function exportJSON() {
   a.click();
 }
 
+// IMPORT
 function importJSON() {
   const file = document.getElementById('import-file').files[0];
   if (!file) return alert("Select file");
@@ -234,4 +236,9 @@ function importJSON() {
     alert("Imported!");
   };
   reader.readAsText(file);
+}
+
+// EXIT ADMIN
+function exitAdmin() {
+  location.reload();
 }
